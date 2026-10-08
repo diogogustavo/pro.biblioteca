@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Biblioteca Pública - Painel de Gestão</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: { 50: '#eef2ff', 100: '#e0e7ff', 500: '#6366f1', 600: '#4f46e5', 700: '#4338ca' }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="h-full bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 transition-colors duration-200">
+
+    <div id="app" class="flex h-full overflow-hidden">
+        
+        <!-- Mobile Sidebar Backdrop -->
+        <div id="sidebar-backdrop" class="fixed inset-0 bg-slate-900/50 z-40 hidden md:hidden" onclick="toggleSidebar()"></div>
+
+        <!-- Sidebar -->
+        <aside id="sidebar" class="fixed md:static inset-y-0 left-0 z-50 w-64 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 flex flex-col transition-transform duration-300 -translate-x-full md:translate-x-0">
+            <!-- Brand Logo -->
+            <div class="h-16 flex items-center px-6 gap-3 border-b border-slate-200 dark:border-slate-700">
+                <div class="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center text-white shadow-lg shadow-indigo-500/30">
+                    <i class="fa-solid fa-book-open text-lg"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-base leading-tight">BiblioSmart</h1>
+                    <span class="text-xs text-slate-500 dark:text-slate-400">Sistema de Gestão</span>
+                </div>
+            </div>
+
+            <!-- Navigation Links -->
+            <nav class="flex-1 px-4 py-6 space-y-1.5 overflow-y-auto custom-scrollbar">
+                <button onclick="switchTab('dashboard')" id="nav-dashboard" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm transition-all text-indigo-600 bg-indigo-50 dark:bg-indigo-950/50 dark:text-indigo-400">
+                    <i class="fa-solid fa-chart-pie w-5 text-center"></i> Visão Geral
+                </button>
+                <button onclick="switchTab('books')" id="nav-books" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm transition-all text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700/50">
+                    <i class="fa-solid fa-book w-5 text-center"></i> Acervo de Livros
+                </button>
+                <button onclick="switchTab('loans')" id="nav-loans" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm transition-all text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700/50">
+                    <i class="fa-solid fa-handshake w-5 text-center"></i> Empréstimos
+                </button>
+                <button onclick="switchTab('members')" id="nav-members" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm transition-all text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700/50">
+                    <i class="fa-solid fa-users w-5 text-center"></i> Leitores / Membros
+                </button>
+            </nav>
+
+            <!-- Sidebar Footer / User Profile -->
+            <div class="p-4 border-t border-slate-200 dark:border-slate-700">
+                <div class="flex items-center gap-3 p-2 rounded-xl bg-slate-50 dark:bg-slate-700/30">
+                    <div class="w-9 h-9 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 flex items-center justify-center font-bold text-sm">A</div>
+                    <div class="overflow-hidden">
+                        <h4 class="text-xs font-semibold truncate">Bibliotecário Chefe</h4>
+                        <p class="text-[10px] text-slate-500 dark:text-slate-400 truncate">admin@biblioteca.gov</p>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <main class="flex-1 flex flex-col h-full overflow-hidden">
+            <!-- Top Header -->
+            <header class="h-16 bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between px-6 z-30">
+                <div class="flex items-center gap-4">
+                    <button onclick="toggleSidebar()" class="md:hidden text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 focus:outline-none">
+                        <i class="fa-solid fa-bars text-lg"></i>
+                    </button>
+                    <h2 id="page-title" class="text-lg font-bold">Painel Estatístico</h2>
+                </div>
+                
+                <div class="flex items-center gap-3">
+                    <!-- Quick Action Button -->
+                    <button onclick="openModal('book')" class="hidden sm:inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl text-sm font-medium transition shadow-sm shadow-indigo-500/20">
+                        <i class="fa-solid fa-plus text-xs"></i> Novo Livro
+                    </button>
+                    <!-- Theme Toggle -->
+                    <button onclick="toggleDarkMode()" class="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600 transition">
+                        <i id="theme-icon" class="fa-solid fa-moon"></i>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Scrollable Content Area -->
+            <div class="flex-1 overflow-y-auto custom-scrollbar p-6">
+
+                <section id="tab-dashboard" class="space-y-6">
+                    <!-- Statistics Grid -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                        <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-xl bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-xl">
+                                <i class="fa-solid fa-book"></i>
+                            </div>
+                            <div>
+                                <span class="text-xs font-medium text-slate-500 dark:text-slate-400">Total de Livros</span>
+                                <h3 id="stat-total-books" class="text-2xl font-bold mt-0.5">0</h3>
+                            </div>
+                        </div>
+                        <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-xl bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400 flex items-center justify-center text-xl">
+                                <i class="fa-solid fa-handshake-angle"></i>
+                            </div>
+                            <div>
+                                <span class="text-xs font-medium text-slate-500 dark:text-slate-400">Livros Emprestados</span>
+                                <h3 id="stat-borrowed-books" class="text-2xl font-bold mt-0.5">0</h3>
+                            </div>
+                        </div>
+                        <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-xl">
+                                <i class="fa-solid fa-users"></i>
+                            </div>
+                            <div>
+                                <span class="text-xs font-medium text-slate-500 dark:text-slate-400">Leitores Cadastrados</span>
+                                <h3 id="stat-total-members" class="text-2xl font-bold mt-0.5">0</h3>
+                            </div>
+                        </div>
+                        <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-xl bg-rose-50 dark:bg-rose-950/50 text-rose-600 dark:text-rose-400 flex items-center justify-center text-xl">
+                                <i class="fa-solid fa-triangle-exclamation"></i>
+                            </div>
+                            <div>
+                                <span class="text-xs font-medium text-slate-500 dark:text-slate-400">Empréstimos Atrasados</span>
+                                <h3 id="stat-overdue-books" class="text-2xl font-bold mt-0.5">0</h3>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Activity & Quick Shortcuts -->
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div class="lg:col-span-2 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-6 shadow-sm">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="font-bold text-base">Últimos Empréstimos Registrados</h3>
+                                <button onclick="switchTab('loans')" class="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline">Ver todos</button>
+                            </div>
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left text-sm">
+                                    <thead class="bg-slate-50 dark:bg-slate-700/50 text-slate-500 dark:text-slate-400 text-xs uppercase">
+                                        <tr>
+                                            <th class="p-3 rounded-l-xl">Leitor</th>
+                                            <th class="p-3">Livro</th>
+                                            <th class="p-3">Data Devolução</th>
+                                            <th class="p-3 rounded-r-xl">Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="recent-loans-tbody" class="divide-y divide-slate-100 dark:divide-slate-700/50">
+                                        <!-- Dynamic rows -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Quick Actions Panel -->
+                        <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-6 shadow-sm flex flex-col justify-between">
+                            <div>
+                                <h3 class="font-bold text-base mb-4">Ações Rápidas</h3>
+                                <div class="space-y-3">
+                                    <button onclick="openModal('book')" class="w-full flex items-center gap-3 p-3 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-indigo-500 dark:hover:border-indigo-500 hover:bg-indigo-50/50 dark:hover:bg-indigo-950/30 transition text-left group">
+                                        <div class="w-10 h-10 rounded-lg bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 flex items-center justify-center group-hover:scale-105 transition">
+                                            <i class="fa-solid fa-plus"></i>
+                                        </div>
+                                        <div>
+                                            <h4 class="text-sm font-semibold">Cadastrar Livro</h4>
+                                            <p class="text-xs text-slate-500 dark:text-slate-400">Adicionar novo exemplar ao acervo</p>
+                                        </div>
+                                    </button>
+
+                                    <button onclick="openModal('loan')" class="w-full flex items-center gap-3 p-3 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-amber-500 dark:hover:border-amber-500 hover:bg-amber-50/50 dark:hover:bg-amber-950/30 transition text-left group">
+                                        <div class="w-10 h-10 rounded-lg bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400 flex items-center justify-center group-hover:scale-105 transition">
+                                            <i class="fa-solid fa-handshake"></i>
+                                        </div>
+                                        <div>
+                                            <h4 class="text-sm font-semibold">Registrar Empréstimo</h4>
+                                            <p class="text-xs text-slate-500 dark:text-slate-400">Vincular livro a um leitor</p>
+                                        </div>
+                                    </button>
+
+                                    <button onclick="openModal('member')" class="w-full flex items-center gap-3 p-3 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-emerald-500 dark:hover:border-emerald-500 hover:bg-emerald-50/50 dark:hover:bg-emerald-950/30 transition text-left group">
+                                        <div class="w-10 h-10 rounded-lg bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 flex items-center justify-center group-hover:scale-105 transition">
+                                            <i class="fa-solid fa-user-plus"></i>
+                                        </div>
+                                        <div>
+                                            <h4 class="text-sm font-semibold">Novo Leitor</h4>
+                                            <p class="text-xs text-slate-500 dark:text-slate-400">Cadastrar novo membro</p>
+                                        </div>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="mt-6 pt-4 border-t border-slate-100 dark:border-slate-700 text-center">
+                                <span class="text-xs text-slate-400">BiblioSmart v2.4 • Sistema Online</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="tab-books" class="space-y-6 hidden">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
+                        <!-- Realtime Search Box -->
+                        <div class="relative w-full sm:w-80">
+                            <i class="fa-solid fa-search absolute left-3.5 top-3 text-slate-400 text-sm"></i>
+                            <input type="text" id="search-books" oninput="filterBooks()" placeholder="Buscar por título, autor ou gênero..." class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm focus:outline-none focus:border-indigo-500 transition">
+                        </div>
+                        <div class="flex items-center gap-3 w-full sm:w-auto">
+                            <select id="filter-genre" onchange="filterBooks()" class="px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm focus:outline-none focus:border-indigo-500 transition flex-1 sm:flex-initial">
+                                <option value="">Todos os Gêneros</option>
+                                <option value="Ficção">Ficção</option>
+                                <option value="Fantasia">Fantasia</option>
+                                <option value="Romance">Romance</option>
+                                <option value="Técnico / Programação">Técnico / Programação</option>
+                                <option value="História">História</option>
+                            </select>
+                            <button onclick="openModal('book')" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-xl text-sm font-medium transition shadow-sm whitespace-nowrap">
+                                <i class="fa-solid fa-plus mr-1.5"></i> Adicionar
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Books Grid with Clean Colored Cards & Icons (No images) -->
+                    <div id="books-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+                        <!-- Dynamic book cards -->
+                    </div>
+                </section>
+
+                <section id="tab-loans" class="space-y-6 hidden">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
+                        <div class="relative w-full sm:w-80">
+                            <i class="fa-solid fa-search absolute left-3.5 top-3 text-slate-400 text-sm"></i>
+                            <input type="text" id="search-loans" oninput="filterLoans()" placeholder="Buscar empréstimo..." class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm focus:outline-none focus:border-indigo-500 transition">
+                        </div>
+                        <button onclick="openModal('loan')" class="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-xl text-sm font-medium transition shadow-sm">
+                            <i class="fa-solid fa-handshake mr-1.5"></i> Novo Empréstimo
+                        </button>
+                    </div>
+
+                    <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-sm">
+                                <thead class="bg-slate-50 dark:bg-slate-700/50 text-slate-500 dark:text-slate-400 text-xs uppercase">
+                                    <tr>
+                                        <th class="p-4">Leitor</th>
+                                        <th class="p-4">Livro Emprestado</th>
+                                        <th class="p-4">Data Empréstimo</th>
+                                        <th class="p-4">Data Devolução</th>
+                                        <th class="p-4">Status</th>
+                                        <th class="p-4 text-right">Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="loans-tbody" class="divide-y divide-slate-100 dark:divide-slate-700/50">
+                                    <!-- Dynamic rows -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="tab-members" class="space-y-6 hidden">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
+                        <div class="relative w-full sm:w-80">
+                            <i class="fa-solid fa-search absolute left-3.5 top-3 text-slate-400 text-sm"></i>
+                            <input type="text" id="search-members" oninput="filterMembers()" placeholder="Buscar por nome ou email..." class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm focus:outline-none focus:border-indigo-500 transition">
+                        </div>
+                        <button onclick="openModal('member')" class="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-xl text-sm font-medium transition shadow-sm">
+                            <i class="fa-solid fa-user-plus mr-1.5"></i> Novo Leitor
+                        </button>
+                    </div>
+
+                    <div id="members-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                        <!-- Dynamic member cards -->
+                    </div>
+                </section>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal: Add Book -->
+    <div id="modal-book" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white dark:bg-slate-800 rounded-2xl max-w-md w-full p-6 border border-slate-200 dark:border-slate-700 shadow-xl">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-bold">Cadastrar Novo Livro</h3>
+                <button onclick="closeModal('book')" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <form id="form-book" onsubmit="handleBookSubmit(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold uppercase text-slate-500 dark:text-slate-400 mb-1">Título do Livro</label>
+                    <input type="text" id="book-title" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm focus:outline-none focus:border-indigo-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase text-slate-500 dark:text-slate-400 mb-1">Autor</label>
+                    <input type="text" id="book-author" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm focus:outline-none focus:border-indigo-500">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-slate-500 dark:text-slate-400 mb-1">Gênero</label>
+                        <select id="book-genre" class="w-full px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm focus:outline-none focus:border-indigo-500">
+                            <option value="Ficção">Ficção</option>
+                            <option value="Fantasia">Fantasia</option>
+                            <option value="Romance">Romance</option>
+                            <option value="Técnico / Programação">Técnico / Programação</option>
+                            <option value="História">História</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase text-slate-500 dark:text-slate-400 mb-1">Ano de Publicação</label>
+                        <input type="number" id="book-year" required value="2023" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm focus:outline-none focus:border-indigo-500">
+                    </div>
+                </div>
+                <div class="flex justify-end gap-3 pt-2">
+                    <button type="button" onclick="closeModal('book')" class="px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-700 transition">Cancelar</button>
+                    <button type="submit" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium transition shadow-sm">Salvar Livro</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Register Loan -->
+    <div id="modal-loan" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white dark:bg-slate-800 rounded-2xl max-w-md w-full p-6 border border-slate-200 dark:border-slate-700 shadow-xl">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-bold">Registrar Empréstimo</h3>
+                <button onclick="closeModal('loan')" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <form id="form-loan" onsubmit="handleLoanSubmit(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold uppercase text-slate-500 dark:text-slate-400 mb-1">Selecione o Leitor</label>
+                    <select id="loan-member" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm focus:outline-none focus:border-indigo-500">
+                        <!-- Dynamic member options -->
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase text-slate-500 dark:text-slate-400 mb-1">Selecione o Livro Disponível</label>
+                    <select id="loan-book" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm focus:outline-none focus:border-indigo-500">
+                        <!-- Dynamic book options -->
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase text-slate-500 dark:text-slate-400 mb-1">Prazo de Devolução (Dias)</label>
+                    <input type="number" id="loan-days" value="14" min="1" max="60" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm focus:outline-none focus:border-indigo-500">
+                </div>
+                <div class="flex justify-end gap-3 pt-2">
+                    <button type="button" onclick="closeModal('loan')" class="px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-700 transition">Cancelar</button>
+                    <button type="submit" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium transition shadow-sm">Confirmar Empréstimo</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Register Member (No Phone field) -->
+    <div id="modal-member" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white dark:bg-slate-800 rounded-2xl max-w-md w-full p-6 border border-slate-200 dark:border-slate-700 shadow-xl">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-bold">Cadastrar Novo Leitor</h3>
+                <button onclick="closeModal('member')" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <form id="form-member" onsubmit="handleMemberSubmit(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold uppercase text-slate-500 dark:text-slate-400 mb-1">Nome Completo</label>
+                    <input type="text" id="member-name" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm focus:outline-none focus:border-indigo-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold uppercase text-slate-500 dark:text-slate-400 mb-1">E-mail</label>
+                    <input type="email" id="member-email" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm focus:outline-none focus:border-indigo-500">
+                </div>
+                <div class="flex justify-end gap-3 pt-2">
+                    <button type="button" onclick="closeModal('member')" class="px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-700 transition">Cancelar</button>
+                    <button type="submit" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium transition shadow-sm">Cadastrar Leitor</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Notification Toast Box -->
+    <div id="toast" class="fixed bottom-5 right-5 z-50 transform translate-y-24 opacity-0 transition-all duration-300 bg-slate-900 text-white dark:bg-white dark:text-slate-900 px-5 py-3 rounded-xl shadow-xl flex items-center gap-3 text-sm font-medium">
+        <i id="toast-icon" class="fa-solid fa-circle-check text-emerald-400"></i>
+        <span id="toast-message">Operação realizada com sucesso!</span>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
